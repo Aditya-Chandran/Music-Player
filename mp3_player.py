@@ -26,20 +26,20 @@ mp.config(bg='#0F111A')
 mp.geometry("600x400")
 mp.resizable(False,False)
 
-previous_button=PhotoImage(file="previous.png")
-previous=Button(mp,image=previous_button,bd=0,bg='#0F111A',activebackground='#0F111A').place(x=90,y=320)
+previous_button=PhotoImage(file="previous_new.png")
+previous=Button(mp,image=previous_button,bd=0,bg='#0F111A',activebackground='#0F111A',height=60,width=60).place(x=90,y=320)
 
-play_button=PhotoImage(file="play.png")
-play=Button(mp,image=play_button,bd=0,bg='#0F111A',activebackground='#0F111A',command=play_song).place(x=210,y=320)
+play_button=PhotoImage(file="play_new.png")
+play=Button(mp,image=play_button,bd=0,bg='#0F111A',activebackground='#0F111A',command=play_song,height=60,width=60).place(x=210,y=320)
 
-pause_button=PhotoImage(file="pause.png")
-pause=Button(mp,image=pause_button,bd=0,bg='#0F111A',activebackground='#0F111A',command=mixer.music.pause).place(x=320,y=320)
+pause_button=PhotoImage(file="pause_new.png")
+pause=Button(mp,image=pause_button,bd=0,bg='#0F111A',activebackground='#0F111A',command=mixer.music.pause,height=60,width=60).place(x=320,y=320)
 
-next_button=PhotoImage(file="next.png")
-next=Button(mp,image=next_button,bd=0,bg='#0F111A',activebackground='#0F111A',).place(x=440,y=320)
+next_button=PhotoImage(file="next_new.png")
+next=Button(mp,image=next_button,bd=0,bg='#0F111A',activebackground='#0F111A',height=60,width=60).place(x=440,y=320)
 
 title_bar=Label(mp,bg='#040508',height='2',width='400').pack(side=TOP)
-add_song=Button(mp,text='Add Songs',font=('Segoe',14,'bold'),fg='white',bg='#040508',bd=0,activebackground='#212942',activeforeground='#818182',command=open_folder).place(x=10,y=2)
+add_song=Button(mp,text='Add Songs',font=('Segoe',14,'bold'),fg='black',bg='#8904b5',bd=0,activebackground='#8904b5',activeforeground='black',command=open_folder).place(x=10,y=2)
 
 music_list=Frame(mp,bd=2,relief=RIDGE)
 music_list.place(x=150,y=100,width=350,height=200)
