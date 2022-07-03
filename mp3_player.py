@@ -4,6 +4,7 @@ from tkinter import filedialog
 from turtle import color
 import os
 from pygame import mixer
+import tkinter.ttk as ttk
 
 def open_folder():
     path=filedialog.askdirectory()
