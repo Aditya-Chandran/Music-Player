@@ -18,6 +18,10 @@ def play_song():
     mixer.init()
     mixer.music.load(playlist.get(ACTIVE))  
     mixer.music.play()
+# ongoing of a slider 
+def mp3_slider():
+    pass
+
 
 mp=Tk()
 mp.iconbitmap(r'rickroll.ico')
@@ -51,5 +55,9 @@ playlist=Listbox(music_list,width=350,font=("Candara",10),bg='black',fg='white',
 scroll.config(command=playlist.yview)
 scroll.pack(side=RIGHT,fill=Y)
 playlist.pack(side=LEFT,fill=BOTH)
+
+#creating a position slider (ongoing)
+slider=ttk.Scale(mp,from_=0 ,to=100,orient=HORIZONTAL,value=0)
+slider.pack(pady=20)
 
 mp.mainloop()
