@@ -96,7 +96,7 @@ playlist=ttk.Treeview(mp,show='headings',height=19)
 playlist["columns"]=('Path','Title','Artist','Album','Genre','Time')
 
 playlist.column('#0',width=0,stretch=NO)
-playlist.column('Path',width=0,maxwidth=0,stretch=NO)
+playlist.column('Path',width=0,stretch=NO)
 playlist.column('Title',anchor=W,width=200,minwidth=50)
 playlist.column('Artist',anchor=W,width=200,minwidth=50)
 playlist.column('Album',anchor=W,width=200,minwidth=50)
