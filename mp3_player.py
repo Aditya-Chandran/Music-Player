@@ -106,7 +106,9 @@ style.theme_use("clam")
 style.configure('Treeview',rowheight=25)
 playlist.tag_configure('even',background='#737373',foreground='white')
 playlist.tag_configure('odd',background='#4D4D4D',foreground='white')
-
+#creating a position slider (ongoing)
+slider=ttk.Scale(mp,from_=0 ,to=100,orient=HORIZONTAL,value=0)
+slider.pack(pady=20)
 
 
 mp.mainloop()
