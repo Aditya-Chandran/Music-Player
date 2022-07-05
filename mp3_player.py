@@ -6,8 +6,10 @@ from tkinter import filedialog
 from tkinter.ttk import Treeview
 from turtle import color
 import os
+import pygame
 from pygame import mixer
 from tinytag import TinyTag
+import time
 
 #------------------------------ Initializing window for program -------------------------
 mp=Tk()
@@ -28,7 +30,13 @@ def open_folder():
             if song.endswith(".mp3"):
                 song_path=f"{path}/{song}"
                 music=TinyTag.get(song_path)
-                song_detail=(song_path,music.title,music.artist,music.album,music.genre,int(music.duration))
+                # changing the float time of song in hh : mm : ss form
+                duration=''
+                if music.duration>=3600:
+                    duration=time.strftime('%H : %M : %S',time.gmtime(music.duration))
+                else:
+                    duration=time.strftime('%M : %S',time.gmtime(music.duration))
+                song_detail=(song_path,music.title,music.artist,music.album,music.genre,duration)
                 if i%2==0:
                     playlist.insert(parent='',index=END,iid=i,values=song_detail,tags=('even',))
                 else:
@@ -36,9 +44,29 @@ def open_folder():
                 i+=1
 
 #------------------------------- Music control functions ------------------------------------
+
 paused=True
 selected=""
 old_selection=""
+paused=False
+length=0
+
+#............... display length of the new song ..........
+def change_length(values):
+    global length
+    length=values[5]
+    length=length.split(" : ")
+    sum,i=0,len(length)-1
+    while i!=-1:
+        if i==len(length)-1:
+            sum+=int(length[i])
+        else:
+            sum+=int(length[i])*60
+        i-=1
+    length=sum
+
+#......... checks if music is starting or was already playing ..........
+
 def check():
     global selected,old_selection,paused
     selected=playlist.focus()
@@ -48,11 +76,14 @@ def check():
     else:
         play_song()
 
+#.................. resume function ......................
+
 def resume_song():
     play.config(image=pause_button,command=pause_song)
     mixer.init()
     mixer.music.unpause()
 
+#.................... play new song function ....................
 def play_song():
     global selected,old_selection
     mixer.init()
@@ -60,21 +91,57 @@ def play_song():
     old_selection=selected
     values=playlist.item(selected,'values')
     path=values[0]
+    change_length(values)
+    mixer.music.load(path)
+    slider.config(to=length)
+    mixer.music.play()
+
+#................... pause song .............................
+
+def pause_song():
+    global paused
+    mixer.init()
+    mixer.music.pause()
+    paused=True
+    play.config(image=play_button,command=check)
+    
+#..................... plays next song ............................
+
+def next_song():
+    mixer.init()
+    play.config(image=pause_button,command=pause_song)
+    global selected,old_selection
+    selected=str(int(selected)+1)
+    old_selection=selected
+    values=playlist.item(selected,'values')
+    path=values[0]
+    change_length(values)
+    slider.config(to=length,value=0)
     mixer.music.load(path)
     mixer.music.play()
 
-def pause_song():
-    mixer.init()
-    mixer.music.pause()
-    play.config(image=play_button,command=check)
-    
+#..................... plays previous song ......................
 
-#------ Creating a black area in the bottom of window, where the commands will be shown ---------
+def previous_song():
+    play.config(image=pause_button,command=pause_song)
+    mixer.init()
+    global selected,old_selection
+    selected=str(int(selected)-1)
+    old_selection=selected
+    values=playlist.item(selected,'values')
+    path=values[0]
+    change_length(values)
+    slider.config(to=length,value=0)
+    mixer.music.load(path)
+    mixer.music.play()
+
+#............ creating a label for all commands button ......................
 bottom=Label(height='10',width='1100',bg='black').place(x=0,y=540)
 
 #----------------------------- Creating buttons -----------------------------------
 previous_button=PhotoImage(file="previous.png")
-previous=Button(mp,image=previous_button,bd=0,bg='black',activebackground='black').place(x=40,y=555.5)
+previous=Button(mp,image=previous_button,bd=0,bg='black',activebackground='black',command=previous_song)
+previous.place(x=40,y=555.5)
 
 play_button=PhotoImage(file="play.png")
 pause_button=PhotoImage(file="pause.png")
@@ -83,7 +150,7 @@ play=Button(mp,image=play_button,bd=0,bg='black',activebackground='black',comman
 play.place(x=110,y=553)
 
 next_button=PhotoImage(file="next.png")
-next=Button(mp,image=next_button,bd=0,bg='black',activebackground='black',)
+next=Button(mp,image=next_button,bd=0,bg='black',activebackground='black',command=next_song)
 next.place(x=180,y=555.5)
 
 #------------------ Title bar, to add commands like add song -----------------------
@@ -95,14 +162,16 @@ add_song=Button(mp,text='Add Songs',font=('Segoe',14,'bold'),fg='white',bg='#040
 playlist=ttk.Treeview(mp,show='headings',height=19)
 playlist["columns"]=('Path','Title','Artist','Album','Genre','Time')
 
+#setting width of playlist columns
 playlist.column('#0',width=0,stretch=NO)
 playlist.column('Path',width=0,stretch=NO)
 playlist.column('Title',anchor=W,width=200,minwidth=50)
 playlist.column('Artist',anchor=W,width=200,minwidth=50)
 playlist.column('Album',anchor=W,width=200,minwidth=50)
 playlist.column('Genre',anchor=W,width=150,minwidth=50)
-playlist.column('Time',anchor=W,width=82,minwidth=50)
+playlist.column('Time',anchor=E,width=82,minwidth=50)
 
+#setting headings of playlist columns
 playlist.heading('Path',text='Path',anchor=W)
 playlist.heading('Title',text='Title',anchor=W)
 playlist.heading('Artist',text='Artist',anchor=W)
@@ -112,14 +181,17 @@ playlist.heading('Time',text='Time',anchor=W)
 
 playlist.place(x=250,y=35)
 
+#adding a scrollbar to the playlist
 scroll=ttk.Scrollbar(mp,orient=VERTICAL,command=playlist.yview)
 playlist.configure(yscroll=scroll.set)
 scroll.pack(side=RIGHT,fill=Y)
 
+#changing style of the playlist
 style=ttk.Style(mp)
 style.theme_use("clam")
 style.configure('Treeview',rowheight=25,fieldbackground='silver')
 playlist.tag_configure('even',background='#737373',foreground='white')
 playlist.tag_configure('odd',background='#4D4D4D',foreground='white')
+
 
 mp.mainloop()
