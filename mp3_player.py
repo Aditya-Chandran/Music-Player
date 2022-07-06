@@ -203,6 +203,24 @@ slider.place(x=250,y=565)
 song_name=Label(mp,bg='black',fg='white')
 song_name.place(x=246,y=540)
 
+# volume part 
+def change_volume(x):
+    mixer.init()
+    mixer.music.set_volume(volume.get())
+    volume_label.config(text=f"Vol : {int(mixer.music.get_volume()*100)}")
+    
+# def open_volume():
+#     volume=ttk.Scale(mp,from_=0,to=1,value=1,command=change_volume,orient=VERTICAL)
+#     volume.place(x=910,y=565)
+
+# volume_win=Tk()
+# volume=Button(command=open_volume)
+volume=ttk.Scale(mp,from_=0,to=1,value=1,command=change_volume)
+volume.place(x=910,y=565)
+
+volume_label=Label(mp,text=f"Vol : {int(volume.get()*100)}",bg='black',fg='white')
+volume_label.place(x=905,y=540)
+
 
 
 
