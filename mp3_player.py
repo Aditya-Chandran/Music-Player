@@ -1,11 +1,10 @@
 import tkinter as tk
 from tkinter import *
-from tkinter import ttk
-from tkinter import ttk
-from tkinter import filedialog
+from tkinter import ttk,filedialog
 from tkinter.ttk import Treeview
 from turtle import color
 import os
+from types import NoneType
 import pygame
 from pygame import mixer
 from tinytag import TinyTag
@@ -13,36 +12,72 @@ import time
 
 #------------------------------ Initializing window for program -------------------------
 mp=Tk()
-mp.iconbitmap(r'rickroll.ico')
+mp.iconbitmap(r'icons/rickroll.ico')
 mp.title("ANA Music Player")
 mp.config(bg='#0F111A')
 mp.resizable(False,False)
 mp.geometry("1100x600")
 
+#----------------------- Enter song info for playlist ---------------------------
+def song_info(song,song_path):
+    music=TinyTag.get(song_path)
+    name=''
+    if type(music.title)==NoneType:
+        name=f"{song[:-4]}"
+    else:
+        name=music.title
+    album=''
+    if type(music.album)==NoneType:
+        album=""
+    else:
+        album=music.album
+    artist=''
+    if type(music.artist)==NoneType:
+        artist="Unknown Artist"
+    else:
+        artist=music.artist
+    genre=''
+    if type(music.genre)==NoneType:
+        genre=""
+    else:
+        genre=music.genre
+    duration=''
+    if music.duration>=3600:
+        duration=time.strftime('%H : %M : %S',time.gmtime(music.duration))
+    else:
+        duration=time.strftime('%M : %S',time.gmtime(music.duration))
+    song_detail=(song_path,name,artist,album,genre,duration)
+    
+    return song_detail
 #-------------- this will open a dialogue box to select song folder ------------------------------
 def open_folder():
+    global i,detail_list
     path=filedialog.askdirectory()
-    if path:
-        os.chdir(path)
-        songs=os.listdir(path)
-        i=0
-        for song in songs:
+    for (root,dirs,files) in os.walk(path):
+        for song in files:
             if song.endswith(".mp3"):
-                song_path=f"{path}/{song}"
-                music=TinyTag.get(song_path)
-                # changing the float time of song in hh : mm : ss form
-                duration=''
-                if music.duration>=3600:
-                    duration=time.strftime('%H : %M : %S',time.gmtime(music.duration))
+                rooter=[]
+                for ch in root:
+                    if ch=='\\':
+                        ch='/'
+                    rooter.append(ch)
+                rooter="".join(rooter)
+                song_path=f"{rooter}/{song}"
+                song_detail=song_info(song,song_path)
+                if song_path in detail_list:
+                    pass
                 else:
-                    duration=time.strftime('%M : %S',time.gmtime(music.duration))
-                song_detail=(song_path,music.title,music.artist,music.album,music.genre,duration)
-                if i%2==0:
-                    playlist.insert(parent='',index=END,iid=i,values=song_detail,tags=('even',))
-                else:
-                    playlist.insert(parent='',index=END,iid=i,values=song_detail,tags=('odd',))
-                i+=1
-
+                    with open('Playlists\Main.txt','r',encoding="utf-8") as f_read:
+                        elements=f_read.readlines()
+                        i=len(elements)
+                        if i%2==0:
+                            playlist.insert(parent='',index=-1,iid=i,values=song_detail,tags=('even',))
+                        else:
+                            playlist.insert(parent='',index=-1,iid=i,values=song_detail,tags=('odd',))
+                        i+=1
+                    with open('Playlists\Main.txt','a',encoding="utf-8") as f_add:
+                        f_add.write(f"{song_detail[0]},{song_detail[1]},{song_detail[2]},{song_detail[3]},{song_detail[4]},{song_detail[5]}\n")
+            
 #------------------------------- Music control functions ------------------------------------
 
 paused=True
@@ -82,6 +117,7 @@ def resume_song():
     play.config(image=pause_button,command=pause_song)
     mixer.init()
     mixer.music.unpause()
+    display_time()
 
 #.................... play new song function ....................
 def play_song():
@@ -91,10 +127,12 @@ def play_song():
     old_selection=selected
     values=playlist.item(selected,'values')
     path=values[0]
+    song_name.config(text=f"{values[1]} - {values[2]}")
     change_length(values)
     mixer.music.load(path)
     slider.config(to=length)
     mixer.music.play()
+    display_time()
 
 #................... pause song .............................
 
@@ -112,9 +150,11 @@ def next_song():
     play.config(image=pause_button,command=pause_song)
     global selected,old_selection
     selected=str(int(selected)+1)
+    playlist.config(tags=('select',))
     old_selection=selected
     values=playlist.item(selected,'values')
     path=values[0]
+    song_name.config(text=f"{values[1]} - {values[2]}")
     change_length(values)
     slider.config(to=length,value=0)
     mixer.music.load(path)
@@ -129,7 +169,9 @@ def previous_song():
     selected=str(int(selected)-1)
     old_selection=selected
     values=playlist.item(selected,'values')
+    playlist.config(tags=('select',))
     path=values[0]
+    song_name.config(text=f"{values[1]} - {values[2]}")
     change_length(values)
     slider.config(to=length,value=0)
     mixer.music.load(path)
@@ -139,17 +181,17 @@ def previous_song():
 bottom=Label(height='10',width='1100',bg='black').place(x=0,y=540)
 
 #----------------------------- Creating buttons -----------------------------------
-previous_button=PhotoImage(file="previous.png")
+previous_button=PhotoImage(file="icons/previous.png")
 previous=Button(mp,image=previous_button,bd=0,bg='black',activebackground='black',command=previous_song)
 previous.place(x=40,y=555.5)
 
-play_button=PhotoImage(file="play.png")
-pause_button=PhotoImage(file="pause.png")
+play_button=PhotoImage(file="icons/play.png")
+pause_button=PhotoImage(file="icons/pause.png")
 
 play=Button(mp,image=play_button,bd=0,bg='black',activebackground='black',command=check)
 play.place(x=110,y=553)
 
-next_button=PhotoImage(file="next.png")
+next_button=PhotoImage(file="icons/next.png")
 next=Button(mp,image=next_button,bd=0,bg='black',activebackground='black',command=next_song)
 next.place(x=180,y=555.5)
 
@@ -159,40 +201,65 @@ title_bar=Label(mp,bg='#040508',height='2',width='400').pack(side=TOP)
 add_song=Button(mp,text='Add Songs',font=('Segoe',14,'bold'),fg='white',bg='#040508',bd=0,activebackground='#212942',activeforeground='#818182',command=open_folder).place(x=10,y=2)
 
 #------------------ Created tree to display song details -------------------------
-playlist=ttk.Treeview(mp,show='headings',height=19)
-playlist["columns"]=('Path','Title','Artist','Album','Genre','Time')
+song_frame=Frame(mp)
+song_frame.place(x=0,y=35)
+
+playlist=ttk.Treeview(song_frame,show='headings',height=19)
+playlist["columns"]=('PATH','TITLE','ARTIST','ALBUM','GENRE','TIME')
 
 #setting width of playlist columns
 playlist.column('#0',width=0,stretch=NO)
-playlist.column('Path',width=0,stretch=NO)
-playlist.column('Title',anchor=W,width=200,minwidth=50)
-playlist.column('Artist',anchor=W,width=200,minwidth=50)
-playlist.column('Album',anchor=W,width=200,minwidth=50)
-playlist.column('Genre',anchor=W,width=150,minwidth=50)
-playlist.column('Time',anchor=E,width=82,minwidth=50)
+playlist.column('PATH',width=0,stretch=NO)
+playlist.column('TITLE',anchor=W,width=270,minwidth=50)
+playlist.column('ARTIST',anchor=W,width=270,minwidth=50)
+playlist.column('ALBUM',anchor=W,width=270,minwidth=50)
+playlist.column('GENRE',anchor=W,width=170,minwidth=50)
+playlist.column('TIME',anchor=CENTER,width=82,minwidth=50)
 
 #setting headings of playlist columns
-playlist.heading('Path',text='Path',anchor=W)
-playlist.heading('Title',text='Title',anchor=W)
-playlist.heading('Artist',text='Artist',anchor=W)
-playlist.heading('Album',text='Album',anchor=W)
-playlist.heading('Genre',text='Genre',anchor=W)
-playlist.heading('Time',text='Time',anchor=W)
-
-playlist.place(x=250,y=35)
+playlist.heading('PATH',text='PATH',anchor=W)
+playlist.heading('TITLE',text='TITLE',anchor=W)
+playlist.heading('ARTIST',text='ARTIST',anchor=W)
+playlist.heading('ALBUM',text='ALBUM',anchor=W)
+playlist.heading('GENRE',text='GENRE',anchor=W)
+playlist.heading('TIME',text='TIME',anchor=CENTER)
 
 #adding a scrollbar to the playlist
-scroll=ttk.Scrollbar(mp,orient=VERTICAL,command=playlist.yview)
-playlist.configure(yscroll=scroll.set)
+song_frame.config(height=480,width=15,bd=0)
+scroll=ttk.Scrollbar(song_frame,command=playlist.yview)
+playlist.config(yscrollcommand=scroll.set)
+scroll.config(command=playlist.yview)
 scroll.pack(side=RIGHT,fill=Y)
+playlist.pack(side=LEFT)
 
 #changing style of the playlist
 style=ttk.Style(mp)
 style.theme_use("clam")
-style.configure('Treeview',rowheight=25,fieldbackground='silver')
-playlist.tag_configure('even',background='#737373',foreground='white')
-playlist.tag_configure('odd',background='#4D4D4D',foreground='white')
+style.configure('Treeview',rowheight=25,fieldbackground='#252525')
+playlist.tag_configure('even',background='#2C2C2C',foreground='white')
+playlist.tag_configure('odd',background='#292929',foreground='white')
+playlist.tag_configure('select',background='#292929',foreground='white')
 
+#------------------------ Adding songs saved in playlist ------------------------
+i=0
+detail_list=[]
+with open('Playlists\Main.txt','r',encoding='utf-8') as f:
+    elements=f.readlines()
+    size=len(elements)
+    if size==0:
+        pass
+    else:
+        f.seek(0)
+        for j in range(size):
+            values=f.readline()
+            values=values.split(",")
+            values[5]=values[5][:-1]
+            if i%2==0:
+                playlist.insert(parent='',index=-1,iid=i,values=values,tags=('even',))
+            else:
+                playlist.insert(parent='',index=-1,iid=i,values=values,tags=('odd',))
+            i+=1
+            detail_list.append(values[0])
 #------------------------- Making slider ------------------------------------
 slider_timer=Label(mp,text='- / -',bg='black',fg='white')
 slider_timer.place(x=760,y=540)
@@ -202,26 +269,52 @@ slider.place(x=250,y=565)
 
 song_name=Label(mp,bg='black',fg='white')
 song_name.place(x=246,y=540)
+#..................... to display status time of the song ..................
 
-# volume part 
+def display_time():
+    mixer.init()
+    global length,paused
+    tot_time,curr_time='',''
+    current_time=mixer.music.get_pos()/1000
+
+    if paused:
+        pause_song() 
+    else:
+        if int(slider.get())==length:
+            slider.config(value=0)
+            next_song()
+        if int(slider.get())==0:
+            pass
+        elif int(slider.get())+1!=int(current_time):
+            current_time=int(slider.get())+1
+            mixer.music.play(start=current_time)
+
+        if length>3600:
+            tot_time=time.strftime('%H : %M : %S',time.gmtime(length))
+            curr_time=time.strftime('%H : %M : %S',time.gmtime(current_time))
+        else:
+            tot_time=time.strftime('%M : %S',time.gmtime(length))
+            curr_time=time.strftime('%M : %S',time.gmtime(current_time))
+        
+        slider_timer.config(text=f"{curr_time} / {tot_time}")
+        slider.config(value=current_time)
+        slider_timer.after(1000,display_time)
+
+#--------------------- Making volume slider --------------------------------
+
 def change_volume(x):
     mixer.init()
     mixer.music.set_volume(volume.get())
     volume_label.config(text=f"Vol : {int(mixer.music.get_volume()*100)}")
     
-# def open_volume():
-#     volume=ttk.Scale(mp,from_=0,to=1,value=1,command=change_volume,orient=VERTICAL)
-#     volume.place(x=910,y=565)
+def open_volume():
+    volume=ttk.Scale(mp,from_=0,to=1,value=1,command=change_volume,orient=VERTICAL)
+    volume.place(x=910,y=565)
 
-# volume_win=Tk()
-# volume=Button(command=open_volume)
 volume=ttk.Scale(mp,from_=0,to=1,value=1,command=change_volume)
 volume.place(x=910,y=565)
 
 volume_label=Label(mp,text=f"Vol : {int(volume.get()*100)}",bg='black',fg='white')
 volume_label.place(x=905,y=540)
-
-
-
 
 mp.mainloop()
