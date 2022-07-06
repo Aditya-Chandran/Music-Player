@@ -193,5 +193,17 @@ style.configure('Treeview',rowheight=25,fieldbackground='silver')
 playlist.tag_configure('even',background='#737373',foreground='white')
 playlist.tag_configure('odd',background='#4D4D4D',foreground='white')
 
+#------------------------- Making slider ------------------------------------
+slider_timer=Label(mp,text='- / -',bg='black',fg='white')
+slider_timer.place(x=760,y=540)
+
+slider=ttk.Scale(mp,from_=0,orient=HORIZONTAL,value=0,length=600)
+slider.place(x=250,y=565)
+
+song_name=Label(mp,bg='black',fg='white')
+song_name.place(x=246,y=540)
+
+
+
 
 mp.mainloop()
