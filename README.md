@@ -1,12 +1,12 @@
 ## Hi ! This is a college project, where we made an MP3 Player. 
 ### This MP3 Player was made using Python.
 
-###         Team ANA
+###         Team ANA :
 |Name|Roll No.|
 |---|---|
 |Aditya Chandran|16010121031|
-|Nicole Dcosta|16010121040|
 |Anaya Choudhari|16010121036|
+|Nicole Dcosta|16010121040|
 
 To get the theme that was used, download the file `clamTheme.tcl`.\
 To get the icons used, download the png and ico files in `icons` folder.
