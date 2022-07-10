@@ -9,7 +9,7 @@
 |Anaya Choudhari|16010121036|
 
 To get the theme that was used, download the file `clamTheme.tcl`.\
-To get the icons used, download the png and ico files in `icons` folder.\
+To get the icons used, download the png and ico files in `icons` folder.
 
 ### Modules used for this project :
 - tkinter 
