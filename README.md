@@ -20,7 +20,7 @@ To get the icons used, download the png and ico files in `icons` folder.
 - time
 
 ## A screenshot of the player : 
-![image](https://user-images.githubusercontent.com/106558927/178154889-1c84e1d8-48ba-4c67-bce4-88422925e184.png)
+![image](https://user-images.githubusercontent.com/106558927/178156898-c86cf308-c690-4c70-b4a0-98ac339a8cec.png)
 
 #### To suggest improvements to the MP3 player, write to Aditya Chandran at adityachandrn1@gmail.com .
 
